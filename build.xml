@@ -1,0 +1,44 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="apiminer2-core-build" default="all" basedir=".">
+
+	<property name="source.dir" location="src" />
+	<property name="test.dir" location="test" />
+	<property name="lib.dir" location="lib" />
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+	<property name="data.dir" location="data" />
+	<property name="classes.dir" location="target/classes" />
+	<property name="scripts.dir" location="scripts" />
+	
+	<property name="backup.dir" location="/home/hudson/Dropbox/Backups/APIMiner2/SourceCode" />
+
+	<target name="clear">
+		<delete includeemptydirs="true">
+			<fileset dir="${dist.dir}"/>		
+		</delete>
+	</target>
+	
+    <target name="resolve" description="--> retrieve dependencies with ivy">
+    	<ivy:retrieve pattern="${dist.dir}/lib/[artifact]-[revision].[ext]" type="jar, bundle"/>
+    </target>
+	
+	<target name="build" description="--> build distribution">
+		<copy todir="${dist.dir}">
+			<fileset dir="${classes.dir}"/>
+			<fileset dir="${scripts.dir}"/> 
+		</copy>
+		<copy todir="${dist.dir}/data/">
+			<fileset dir="${data.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/lib/">
+			<fileset dir="${lib.dir}"/>
+		</copy>
+		
+	</target>
+	
+	<target name="backup-sources">
+		<copydir dest="${backup.dir}" src="." excludes="target; dist"/>
+	</target>
+	
+	<target name="all" depends="clear, resolve, build, backup-sources"/>
+	
+</project>

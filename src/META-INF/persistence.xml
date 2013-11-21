@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+	version="1.0">
+  
+  <persistence-unit name="pre-processing" transaction-type="RESOURCE_LOCAL">
+  
+  	<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+  
+  	<class>org.apiminer.entity.api.ApiClass</class>
+  	<class>org.apiminer.entity.api.ApiElement</class>
+  	<class>org.apiminer.entity.api.ApiEnum</class>
+  	<class>org.apiminer.entity.api.ApiMethod</class>
+  	<class>org.apiminer.entity.api.GitHubRepository</class>
+  	<class>org.apiminer.entity.api.Project</class>
+  	<class>org.apiminer.entity.api.ProjectAnalyserStatistic</class>
+  	<class>org.apiminer.entity.api.Repository</class>
+  	<class>org.apiminer.entity.mining.Itemset</class>
+  	<class>org.apiminer.entity.mining.MiningResult</class>
+  	<class>org.apiminer.entity.mining.Rule</class>
+  	<class>org.apiminer.entity.mining.Transaction</class>
+  	<class>org.apiminer.entity.Attachment</class>
+  	
+  	<properties></properties>
+  	
+  </persistence-unit>
+  
+  <persistence-unit name="examples" transaction-type="RESOURCE_LOCAL">
+  
+  	<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+  
+  	<class>org.apiminer.entity.api.ApiClass</class>
+  	<class>org.apiminer.entity.api.ApiElement</class>
+  	<class>org.apiminer.entity.api.ApiEnum</class>
+  	<class>org.apiminer.entity.api.ApiMethod</class>
+  	<class>org.apiminer.entity.api.GitHubRepository</class>
+  	<class>org.apiminer.entity.api.Project</class>
+  	<class>org.apiminer.entity.api.ProjectAnalyserStatistic</class>
+  	<class>org.apiminer.entity.api.Repository</class>
+  	<class>org.apiminer.entity.example.Example</class>
+  	<class>org.apiminer.entity.example.ExampleFeedback</class>
+  	<class>org.apiminer.entity.example.RecommendedCombination</class>
+  	<class>org.apiminer.entity.example.RecommendedExamples</class>
+  	<class>org.apiminer.entity.example.RecommendedSet</class>
+  	<class>org.apiminer.entity.mining.SimpleRule</class>
+  	<class>org.apiminer.entity.mining.Transaction</class>
+  	<class>org.apiminer.entity.Attachment</class>
+  	<class>org.apiminer.entity.Log</class>
+  	
+  	<properties></properties>
+  	
+  </persistence-unit>
+  
+  <persistence-unit name="replicated" transaction-type="RESOURCE_LOCAL">
+  
+  	<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+  
+  	<class>org.apiminer.entity.api.ApiClass</class>
+  	<class>org.apiminer.entity.api.ApiElement</class>
+  	<class>org.apiminer.entity.api.ApiEnum</class>
+  	<class>org.apiminer.entity.api.ApiMethod</class>
+  	<class>org.apiminer.entity.api.GitHubRepository</class>
+  	<class>org.apiminer.entity.api.Project</class>
+  	<class>org.apiminer.entity.api.ProjectAnalyserStatistic</class>
+  	<class>org.apiminer.entity.api.Repository</class>
+  	<class>org.apiminer.entity.mining.Transaction</class>
+  	<class>org.apiminer.entity.Attachment</class>
+  	
+  	<properties></properties>
+  	
+  </persistence-unit>
+  
+</persistence> 
