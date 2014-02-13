@@ -44,6 +44,7 @@
 		<dependency org="org.sonatype.tycho" name="org.eclipse.jdt.core" rev="3.6.1.v_A68_R36x"/>
 		<dependency org="org.jsoup" name="jsoup" rev="1.7.2"/>
 		<dependency org="org.reflections" name="reflections" rev="0.9.8"/>
+		<dependency org="hsqldb" name="hsqldb" rev="1.8.0.10"/>
 	</dependencies>
 	
 </ivy-module>

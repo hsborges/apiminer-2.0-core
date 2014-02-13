@@ -24,18 +24,16 @@ import weka.associations.FPGrowth.BinaryItem;
 import weka.core.Instances;
 
 /**
- * Classe que extrai regras de associação utilizando diversos algoritmos presentes no Weka
- * para isto.
- * 
  * @author Hudson Silva Borges
+ * 
  */
 public class AssociationRulesMine {
 
 	private static final Logger LOGGER = Logger.getLogger(AssociationRulesMine.class);
 
-	private double minConvidence = Double.valueOf(0.9);
-	private double minSupport = Double.valueOf(0);
-	private int maxItens = 4;
+	private double minConvidenceValue = Double.valueOf(0.9);
+	private int minSupportValue = 0;
+	private int maxElements = 4;
 
 	public MiningResult build(Class<? extends AbstractAssociator> algorithm) throws Exception {
 		if (algorithm == FPGrowth.class) {
@@ -45,14 +43,6 @@ public class AssociationRulesMine {
 		}
 	}
 	
-	/**
-	 * Extrai e persiste diretamente na base de dados. Este método é bastante interessante para 
-	 * evitar o elevado consumo de memória quando existem extrai-se muitas regras em um 
-	 * único processo.
-	 * 
-	 * @param miningClass Class with implements the mininer algorithm
-	 * @throws Exception
-	 */
 	public void buildAndPersist(Class<? extends AbstractAssociator> miningClass) throws Exception {
 		if (miningClass == FPGrowth.class) {
 			FPGrowth(true);
@@ -61,37 +51,27 @@ public class AssociationRulesMine {
 		}
 	}
 	
-	/**
-	 * 	Function with implements the FPGrowth algorithm
-	 * 
-	 * @param incrementalPersistence Option to directly persist on database
-	 * @throws Exception
-	 */
 	private MiningResult FPGrowth(boolean incrementalPersistence) throws Exception {
-
 		LOGGER.debug("Mining association rules with algorithm " + FPGrowth.class.getName());
 		
-		Instances instances = WekaUtil.getSparseInstanceWeka((int) minSupport, false);
-		
-		System.gc();
+		Instances instances = WekaUtil.getSparseInstanceWeka(minSupportValue, false);
 
 		LOGGER.debug("Number of instances: " + instances.numInstances());
 		LOGGER.debug("Number of attributes: " + instances.numAttributes());
 
 		// Compute the relative support from absolute support value
-		double relativeMinSupportValue = ((minSupport * 100) / Double
-				.valueOf(instances.numInstances())) / Double.valueOf(100);
+		double relativeMinSupportValue = ((minSupportValue * 100) / Double.valueOf(instances.numInstances())) / Double.valueOf(100);
 		
 		// Instantiate and set parameters
 		FPGrowth growth = new FPGrowth();
 		growth.setLowerBoundMinSupport(relativeMinSupportValue);
-		growth.setMinMetric(minConvidence);
+		growth.setMinMetric(minConvidenceValue);
 		
 		// This parameter is needed for sparse instances
 		growth.setPositiveIndex(2);
 		
 		//FIXME Evaluate if the number of max items is good for the applications
-		growth.setMaxNumberOfItems(maxItens);
+		growth.setMaxNumberOfItems(maxElements);
 		growth.setNumRulesToFind(Integer.MAX_VALUE);
 		
 		//FIXME Evaluate if all rules are needed for the specified support
@@ -119,7 +99,8 @@ public class AssociationRulesMine {
 		
 		LOGGER.debug(String.format("Number of rules discovered: %d",growthRules == null ? 0 : growthRules.size()));
 		
-		Project api = projectDAO.findSourceAPI(DatabaseType.PRE_PROCESSING);
+		Project api = projectDAO.findSourceAPI();
+		
 		List<Project> clients = projectDAO.findAllClients(DatabaseType.PRE_PROCESSING);
 
 		// Handling the findings
@@ -155,7 +136,7 @@ public class AssociationRulesMine {
 						method.setId(Long.parseLong(item.getAttribute().name()));
 						premisseElementList.add(method);
 					}else{
-						premisseElementList.add(methodDAO.find(Long.parseLong(item.getAttribute().name()), DatabaseType.PRE_PROCESSING));
+						premisseElementList.add((ApiMethod) methodDAO.find(Long.parseLong(item.getAttribute().name()), DatabaseType.PRE_PROCESSING));
 					}
 				}
 				Itemset premisseItemset = new Itemset(premisseElementList, ar.getPremiseSupport());
@@ -167,7 +148,7 @@ public class AssociationRulesMine {
 						method.setId(Long.parseLong(item.getAttribute().name()));
 						consequenceElementList.add(method);
 					}else{
-						consequenceElementList.add(methodDAO.find(Long.parseLong(item.getAttribute().name()), DatabaseType.PRE_PROCESSING));
+						consequenceElementList.add((ApiMethod) methodDAO.find(Long.parseLong(item.getAttribute().name()), DatabaseType.PRE_PROCESSING));
 					}
 				}
 				Itemset consequenceItemset = new Itemset(consequenceElementList, ar.getConsequenceSupport());
@@ -198,33 +179,31 @@ public class AssociationRulesMine {
 		
 		LOGGER.debug("Asociation rules mining finished!");
 		
-		System.gc();
-		
 		return result;
 	}
 
 	public double getMinMetricValue() {
-		return minConvidence;
+		return minConvidenceValue;
 	}
 
-	public void setMinMetricValue(double minMetricValue) {
-		this.minConvidence = minMetricValue;
+	public void setMinConfidenceValue(double minMetricValue) {
+		this.minConvidenceValue = minMetricValue;
 	}
 
-	public double getLowerBoundMinSupportValue() {
-		return minSupport;
+	public int getLowerBoundMinSupportValue() {
+		return minSupportValue;
 	}
 
-	public void setLowerBoundMinSupportValue(double lowerBoundMinSupportValue) {
-		this.minSupport = lowerBoundMinSupportValue;
+	public void setMinSupportValue(int lowerBoundMinSupportValue) {
+		this.minSupportValue = lowerBoundMinSupportValue;
 	}
 
 	public int getMaxNumberOfItens() {
-		return maxItens;
+		return maxElements;
 	}
 
-	public void setMaxNumberOfItens(int maxNumberOfItens) {
-		this.maxItens = maxNumberOfItens;
+	public void setMaxNumberOfElements(int maxNumberOfItens) {
+		this.maxElements = maxNumberOfItens;
 	}
 
 }

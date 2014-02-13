@@ -12,6 +12,7 @@ import org.apiminer.daos.DatabaseType;
 import org.apiminer.daos.ExampleDAO;
 import org.apiminer.daos.ProjectDAO;
 import org.apiminer.entities.api.ApiClass;
+import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.ApiMethod;
 import org.apiminer.entities.api.Project;
 import org.apiminer.entities.example.Example;
@@ -43,7 +44,7 @@ public class CompilationChecker {
 			projectDAO = new ProjectDAO();
 			
 			// add as import all API classes
-			Project sourceProject = projectDAO.findSourceAPI(DatabaseType.EXAMPLES);
+			Project sourceProject = projectDAO.findSourceAPI();
 			Set<ApiClass> apiClasses = sourceProject.getApiClass();
 			Set<String> classesStr = new HashSet<String>();
 			for (ApiClass apiClass : apiClasses) {
@@ -91,13 +92,11 @@ public class CompilationChecker {
 			this.defaultImports = defaultImports;
 			this.threadId = threadId;
 			this.exampleDAO = new ExampleDAO();
-			super.status = TaskStatus.WAITING;
 		}
 
 		@Override
 		public void execute() {
-			super.status = TaskStatus.RUNNING;
-			super.notifyObservers(super.status);
+			super.setStatus(TaskStatus.RUNNING);
 			
 			try {
 				LOGGER.info(String.format("Analysing examples of project %s. (Thread %d)", client.getName(), threadId));
@@ -118,9 +117,9 @@ public class CompilationChecker {
 					String extendsStr = "";
 					for (String seed : example.getSeeds()) {
 						if (seed.startsWith("super.") || !seed.contains(".")) {
-							for (ApiMethod apm : example.getApiMethods()) {
+							for (ApiElement apm : example.getApiMethods()) {
 								if (seed.startsWith(apm.getName())) {
-									superMethod = apm.getApiClass().getName();
+									superMethod = ((ApiMethod) apm).getApiClass().getName();
 									extendsStr = "extends ".concat(superMethod);
 									break;
 								}
@@ -147,14 +146,11 @@ public class CompilationChecker {
 					exampleDAO.update(example, DatabaseType.EXAMPLES);
 				}
 				
-				super.result = TaskResult.SUCCESS;
+				super.setResult(TaskResult.SUCCESS);
 			} catch (Exception e) {
-				super.result = TaskResult.FAILURE;
-				super.result.setProblem(e);
+				super.setResult(e);
 			} finally {
-				super.status = TaskStatus.FINISHED;
-				super.notifyObservers(super.result);
-				super.notifyObservers(super.status);
+				super.setStatus(TaskStatus.FINISHED);
 			}
 			
 		}

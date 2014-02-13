@@ -8,11 +8,11 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apiminer.entities.ProjectAnalyserStatistic;
 import org.apiminer.entities.api.ApiClass;
 import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.ApiEnum;
 import org.apiminer.entities.api.ApiMethod;
-import org.apiminer.entities.api.ProjectAnalyserStatistic;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;

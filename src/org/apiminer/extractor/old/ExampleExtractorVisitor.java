@@ -196,7 +196,7 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 		
 		Example example = new Example();
 		example.setAttachment(this.attachmentMap.get(node.getRoot()));
-		example.setApiMethods(new HashSet<ApiMethod>(envolvedApiMethods));
+		example.setApiMethods(new HashSet<ApiElement>(envolvedApiMethods));
 		example.setCodeExample(newAST.toString());
 		example.setSeeds(envolvedSeeds);
 		example.setSourceMethod(node.toString());

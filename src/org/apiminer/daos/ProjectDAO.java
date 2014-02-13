@@ -15,7 +15,7 @@ import org.apiminer.entities.example.Example;
 import org.apiminer.entities.mining.Transaction;
 import org.apiminer.util.DatabaseUtil;
 
-public class ProjectDAO extends GenericDAO<Project> {
+public class ProjectDAO extends GenericDAO {
 
 	public Project find(String projectName, DatabaseType databaseType) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
@@ -59,8 +59,8 @@ public class ProjectDAO extends GenericDAO<Project> {
 		}
 	}
 
-	public Project findSourceAPI(DatabaseType databaseType) {
-		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
+	public Project findSourceAPI() {
+		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, DatabaseType.REPLICATED);
 		try{
 			try {
 				return em.createQuery("SELECT pj FROM Project pj WHERE pj.clientOf IS NULL", Project.class)
@@ -111,7 +111,6 @@ public class ProjectDAO extends GenericDAO<Project> {
 		}
 	}
 	
-	@Override
 	public void persist(Project object, DatabaseType databaseType) {
 		this.prePersist(object);
 		super.persist(object, databaseType);
@@ -143,19 +142,19 @@ public class ProjectDAO extends GenericDAO<Project> {
 	}
 
 	@Override
-	public void delete(long object, final DatabaseType databaseType) {
+	public void delete(Object objectId, final DatabaseType databaseType) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
 		try {
 			em.getTransaction().begin();
 			if (databaseType.equals(DatabaseType.EXAMPLES)) {
 				List<Example> examples = em.createQuery("SELECT e FROM Example e WHERE e.project.id = :projectId", Example.class)
-											.setParameter("projectId", object)
+											.setParameter("projectId", objectId)
 											.getResultList(); 
 				for (Example example : examples) {
 					em.remove(example);
 				}
 			}
-			em.remove(em.find(Project.class, object));
+			em.remove(em.find(Project.class, objectId));
 			em.getTransaction().commit();
 		} catch (PersistenceException e) {
 			em.getTransaction().rollback();
@@ -213,6 +212,11 @@ public class ProjectDAO extends GenericDAO<Project> {
 		}finally{
 			em.close();
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return Project.class;
 	}
 
 }

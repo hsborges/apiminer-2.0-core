@@ -1,5 +1,6 @@
 package org.apiminer.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -11,12 +12,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apiminer.daos.interfaces.IEntity;
-
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Log")
-public class Log implements IEntity {
+public class Log implements Serializable {
 	
 	public static final String GET_EXAMPLE = "GET_EXAMPLE";
 	public static final String GET_RECOMMENDATION = "GET_RECOMMENDATION";

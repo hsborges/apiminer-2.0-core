@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -12,12 +13,13 @@ import javax.persistence.TypedQuery;
 
 import org.apiminer.SystemProperties;
 import org.apiminer.entities.api.ApiClass;
+import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.ApiMethod;
 import org.apiminer.entities.api.Project;
 import org.apiminer.entities.example.Example;
 import org.apiminer.util.DatabaseUtil;
 
-public class ExampleDAO extends GenericDAO<Example> {
+public class ExampleDAO extends GenericDAO {
 	
 	public void persist(Project project, Collection<Example> examples) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, DatabaseType.EXAMPLES);
@@ -56,24 +58,24 @@ public class ExampleDAO extends GenericDAO<Example> {
 		}
 	}
 	
-	public List<Example> findExamplesWithMethods(Collection<ApiMethod> methods) {
+	public List<Example> findExamplesWithMethods(Set<ApiElement> elements) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, DatabaseType.EXAMPLES);
 		try{
 			StringBuilder sb = new StringBuilder()
 									.append("SELECT e ")
 									.append("FROM Example e ")
-									.append("WHERE SIZE(e.apiMethods) = :numMethods ");
+									.append("WHERE SIZE(e.apiElements) = :numElements ");
 			
-			for (int i = 0; i < methods.size(); i++) {
-				sb.append(String.format("AND :apm%d MEMBER OF e.apiMethods ", i));
+			for (int i = 0; i < elements.size(); i++) {
+				sb.append(String.format("AND :apm%d MEMBER OF e.apiElements ", i));
 			}
 			sb.append("ORDER BY e.id ");
 			
-			ApiMethod[] arrayMethods = methods.toArray(new ApiMethod[0]);
+			ApiMethod[] arrayMethods = elements.toArray(new ApiMethod[0]);
 			TypedQuery<Example> query = em.createQuery(sb.toString(), Example.class)
-									  .setParameter("numMethods", methods.size());
+									  .setParameter("numElements", elements.size());
 				
-			for (int i = 0; i < methods.size(); i++) {
+			for (int i = 0; i < elements.size(); i++) {
 				query.setParameter(String.format("apm%d", i), arrayMethods[i]);
 			}
 			
@@ -189,6 +191,11 @@ public class ExampleDAO extends GenericDAO<Example> {
 		} finally {
 			em.close();
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return Example.class;
 	}
 
 }

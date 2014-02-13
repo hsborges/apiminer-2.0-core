@@ -1,5 +1,6 @@
 package org.apiminer.entities.example;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,9 +34,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.apiminer.daos.interfaces.IEntity;
 import org.apiminer.entities.Attachment;
-import org.apiminer.entities.api.ApiMethod;
+import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.Project;
 
 /**
@@ -45,7 +45,7 @@ import org.apiminer.entities.api.Project;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Example")
-public class Example implements IEntity {
+public class Example implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,11 +69,11 @@ public class Example implements IEntity {
 	private List<String> seeds;
 
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	@JoinTable(name = "Example_ApiMethod", 
+	@JoinTable(name = "Example_ApiElement", 
 		joinColumns=@JoinColumn(name = "example_id"),
-		inverseJoinColumns=@JoinColumn(name = "method_id")
+		inverseJoinColumns=@JoinColumn(name = "element_id")
 	)
-	private Set<ApiMethod> apiMethods;
+	private Set<ApiElement> apiElements;
 
 	@Basic(fetch=FetchType.LAZY)
 	@Column(name = "source_method", columnDefinition = "bytea")
@@ -106,7 +106,7 @@ public class Example implements IEntity {
 		inverseJoinColumns=@JoinColumn(name = "recommended_set_id")
 	)
 	@OrderBy("id")
-	private List<RecommendedSet> recommendedSets;
+	private List<AssociatedElement> associatedElement;
 	
 	@Column(name = "has_problems")
 	private boolean hasProblems = false;
@@ -132,9 +132,6 @@ public class Example implements IEntity {
 		return addedAt;
 	}
 
-	public Set<ApiMethod> getApiMethods() {
-		return apiMethods;
-	}
 
 	public String getCodeExample() {
 		return codeExample;
@@ -159,10 +156,6 @@ public class Example implements IEntity {
 
 	public void setAddedAt(Date addedAt) {
 		this.addedAt = addedAt;
-	}
-	
-	public void setApiMethods(Set<ApiMethod> apiMethods) {
-		this.apiMethods = apiMethods;
 	}
 
 	public void setCodeExample(String codeExample) {
@@ -204,7 +197,7 @@ public class Example implements IEntity {
 				.append(project).append(", codeExample=").append(codeExample)
 				.append(", formattedCodeExample=").append(formattedCodeExample)
 				.append(", seeds=").append(seeds).append(", apiMethods=")
-				.append(apiMethods).append(", sourceMethod=")
+				.append(apiElements).append(", sourceMethod=")
 				.append(Arrays.toString(sourceMethod)).append(", addedAt=")
 				.append(addedAt).append("]");
 		return builder.toString();
@@ -234,12 +227,12 @@ public class Example implements IEntity {
 		this.feedbacks = feedbacks;
 	}
 
-	public List<RecommendedSet> getRecommendedSets() {
-		return recommendedSets;
+	public List<AssociatedElement> getRecommendedSets() {
+		return associatedElement;
 	}
 
-	public void setRecommendedSets(List<RecommendedSet> recommendedSets) {
-		this.recommendedSets = recommendedSets;
+	public void setRecommendedSets(List<AssociatedElement> associatedElement) {
+		this.associatedElement = associatedElement;
 	}
 
 	public Map<String, Integer> getMetrics() {
@@ -276,6 +269,22 @@ public class Example implements IEntity {
 
 	public void setProblems(List<Integer> problems) {
 		this.problems = problems;
+	}
+
+	public Set<ApiElement> getApiMethods() {
+		return apiElements;
+	}
+
+	public void setApiMethods(Set<ApiElement> apiMethods) {
+		this.apiElements = apiMethods;
+	}
+
+	public List<AssociatedElement> getRecommendedElements() {
+		return associatedElement;
+	}
+
+	public void setRecommendedElements(List<AssociatedElement> associatedElement) {
+		this.associatedElement = associatedElement;
 	}
 
 

@@ -132,7 +132,7 @@ public final class TasksController {
 				while (task == null && !stopped){
 					if (queue.isEmpty()) {
 						try {
-							Thread.sleep(2*1000);
+							Thread.sleep(1*1000);
 						} catch (InterruptedException e) {}
 					}
 					task = queue.poll();

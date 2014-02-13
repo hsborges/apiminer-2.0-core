@@ -1,11 +1,12 @@
 package org.apiminer.tasks.implementations;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import org.apiminer.entities.example.Example;
-import org.apiminer.entities.example.RecommendedSet;
-import org.apiminer.recommendation.AbstractRecommenderCriteria;
+import org.apiminer.daos.ProjectDAO;
+import org.apiminer.daos.AssociatedElementDAO;
+import org.apiminer.entities.api.ApiClass;
+import org.apiminer.entities.api.ApiMethod;
+import org.apiminer.entities.example.AssociatedElement;
 import org.apiminer.recommendation.examples.ExampleRecommender;
 import org.apiminer.tasks.AbstractTask;
 import org.apiminer.tasks.TaskResult;
@@ -13,46 +14,33 @@ import org.apiminer.tasks.TaskStatus;
 
 public class ExampleRecommenderTask extends AbstractTask {
 
-	private RecommendedSet recommendedSet;
-	
-	private Set<AbstractRecommenderCriteria<Example>> criterias = new HashSet<AbstractRecommenderCriteria<Example>>();
-	
-	public ExampleRecommenderTask(final Set<AbstractRecommenderCriteria<Example>> criterias){
+	public ExampleRecommenderTask(){
 		super();
-		this.recommendedSet = null;
-		this.criterias = criterias;
-	}
-	
-	public ExampleRecommenderTask(final RecommendedSet recommendedSet, final Set<AbstractRecommenderCriteria<Example>> criterias){
-		super();
-		this.recommendedSet = recommendedSet;
-		this.criterias = criterias;
 	}
 	
 	@Override
 	public void execute() {
-		super.status = TaskStatus.RUNNING;
-		super.notifyObservers(TaskStatus.RUNNING);
+		super.setStatus(TaskStatus.RUNNING);
 		
 		try {
 			ExampleRecommender exampleRecommender = new ExampleRecommender();
-			for (AbstractRecommenderCriteria<Example> criteria : criterias) {
-				exampleRecommender.addCriteria(criteria);
+			
+			List<AssociatedElement> res = new AssociatedElementDAO().findAllAssociatedElements();
+			for (AssociatedElement re : res) {
+				exampleRecommender.makeRecommendations(re);
 			}
 			
-			if (recommendedSet != null) {
-				exampleRecommender.buildAndPersist(recommendedSet);
-			} else {
-				exampleRecommender.buildAndPersist();
+			for (ApiClass apc : new ProjectDAO().findSourceAPI().getApiClass()) {
+				for (ApiMethod apm : apc.getApiMethods()) {
+					exampleRecommender.makeRecommendations(apm);
+				}
 			}
 			
-			super.result = TaskResult.SUCCESS;
+			super.setResult(TaskResult.SUCCESS);
 		} catch (Throwable e) {
-			super.result = TaskResult.FAILURE;
-			super.result.setProblem(e);
+			super.setResult(e);
 		} finally {
-			this.status = TaskStatus.FINISHED;
-			super.notifyObservers(TaskStatus.FINISHED);
+			this.setStatus(TaskStatus.FINISHED);
 		}
 	}
 

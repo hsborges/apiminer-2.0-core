@@ -11,7 +11,7 @@ import org.apiminer.entities.api.ApiMethod;
 import org.apiminer.entities.mining.Rule;
 import org.apiminer.util.DatabaseUtil;
 
-public class RuleDAO extends GenericDAO<Rule> {
+public class RuleDAO extends GenericDAO {
 
 	public List<Rule> findByResult(long miningResultId) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, DatabaseType.PRE_PROCESSING);
@@ -62,6 +62,11 @@ public class RuleDAO extends GenericDAO<Rule> {
 		} finally {
 			em.close();
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return Rule.class;
 	}
 
 }

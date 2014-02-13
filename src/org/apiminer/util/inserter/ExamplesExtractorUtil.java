@@ -15,10 +15,10 @@ import org.apiminer.builder.IBuilder;
 import org.apiminer.daos.DatabaseType;
 import org.apiminer.daos.ExampleDAO;
 import org.apiminer.daos.ProjectDAO;
+import org.apiminer.entities.ProjectAnalyserStatistic;
 import org.apiminer.entities.api.ApiClass;
-import org.apiminer.entities.api.ApiMethod;
+import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.Project;
-import org.apiminer.entities.api.ProjectAnalyserStatistic;
 import org.apiminer.entities.api.Repository;
 import org.apiminer.entities.example.Example;
 import org.apiminer.extractor.ExampleExtractor;
@@ -186,7 +186,7 @@ public class ExamplesExtractorUtil {
 		AbstractStringMetric metric = new CosineSimilarity();
 		
 		// Separo os exemplos por grupos, baseado nos elementos que sao baseados
-		Map<Set<ApiMethod>, List<Example>> groups = new HashMap<Set<ApiMethod>, List<Example>>();
+		Map<Set<ApiElement>, List<Example>> groups = new HashMap<Set<ApiElement>, List<Example>>();
 		for (Example ex : examples) {
 			if (!groups.containsKey(ex.getApiMethods())) {
 				groups.put(ex.getApiMethods(), new LinkedList<Example>());
@@ -198,7 +198,7 @@ public class ExamplesExtractorUtil {
 		examples.clear();
 		
 		// Itera sobre os grupos buscando por exemplos duplicados
-		for (Set<ApiMethod> group : groups.keySet()) {
+		for (Set<ApiElement> group : groups.keySet()) {
 			
 			Example[] examplesGroupArray = groups.get(group).toArray(new Example[0]);
 			

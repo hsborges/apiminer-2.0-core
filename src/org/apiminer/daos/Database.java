@@ -10,6 +10,10 @@ public final class Database {
 	public static final String POSTGRESQL_DRIVER = "org.postgresql.Driver";
 	public static final String POSTGRESQL_DIALECT = "org.hibernate.dialect.PostgreSQLDialect";
 	
+	public static final String HSQL_DATABASE = "HSQL";
+	public static final String HSQL_DRIVER = "org.hsqldb.jdbcDriver";
+	public static final String HSQL_DIALECT = "org.hibernate.dialect.HSQLDialect";
+	
 	private String name;
 	
 	private String driverClass;
@@ -31,7 +35,7 @@ public final class Database {
 				&& this.password != null
 				&& this.address != null
 				&& this.port != null
-				&& (this.name.equals(MYSQL_DATABASE) || this.name.equals(POSTGRESQL_DATABASE))
+				&& (this.name.equals(MYSQL_DATABASE) || this.name.equals(POSTGRESQL_DATABASE) || this.name.equals(HSQL_DATABASE))
 				&& this.driverClass != null
 				&& this.dialect != null
 				&& (this.preProcessingSchema != null && !this.preProcessingSchema.isEmpty())
@@ -43,6 +47,8 @@ public final class Database {
 			return "jdbc:mysql://"+address+":"+port+"/"+preProcessingSchema;
 		}else if ( this.name.equals(POSTGRESQL_DATABASE) ){
 			return "jdbc:postgresql://"+address+":"+port+"/"+preProcessingSchema;
+		}else if ( this.name.equals(HSQL_DATABASE) ){
+			return String.format("jdbc:hsqldb:mem:%s", preProcessingSchema);
 		}else{
 			return null;
 		}
@@ -53,6 +59,8 @@ public final class Database {
 			return "jdbc:mysql://"+address+":"+port+"/"+examplesSchema;
 		}else if ( this.name.equals(POSTGRESQL_DATABASE) ){
 			return "jdbc:postgresql://"+address+":"+port+"/"+examplesSchema;
+		}else if ( this.name.equals(HSQL_DATABASE) ){
+			return String.format("jdbc:hsqldb:mem:%s", examplesSchema);
 		}else{
 			return null;
 		}

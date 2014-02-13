@@ -1,22 +1,16 @@
 package org.apiminer.daos;
 
-import java.lang.reflect.ParameterizedType;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.apiminer.SystemProperties;
-import org.apiminer.daos.interfaces.IEntity;
-import org.apiminer.daos.interfaces.IGenericDAO;
 import org.apiminer.util.DatabaseUtil;
 
-class GenericDAO <T extends IEntity> implements IGenericDAO<T> {
+public abstract class GenericDAO {
 	
-	@SuppressWarnings("unchecked")
-	private final Class<T> typeClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+	public abstract Class<?> getObjectType();
 
-	@Override
-	public void persist(T object, final DatabaseType databaseType) {
+	public void persist(Object object, final DatabaseType databaseType) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
 		try {
 			em.getTransaction().begin();
@@ -30,8 +24,7 @@ class GenericDAO <T extends IEntity> implements IGenericDAO<T> {
 		}
 	}
 
-	@Override
-	public void update(T object, final DatabaseType databaseType) {
+	public void update(Object object, final DatabaseType databaseType) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
 		try {
 			em.getTransaction().begin();
@@ -45,12 +38,11 @@ class GenericDAO <T extends IEntity> implements IGenericDAO<T> {
 		}
 	}
 
-	@Override
-	public void delete(long object, final DatabaseType databaseType) {
+	public void delete(Object objectId, final DatabaseType databaseType) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
 		try {
 			em.getTransaction().begin();
-			em.remove(em.find(typeClass, object));
+			em.remove(em.find(getObjectType(), objectId));
 			em.getTransaction().commit();
 		} catch (PersistenceException e) {
 			em.getTransaction().rollback();
@@ -60,11 +52,10 @@ class GenericDAO <T extends IEntity> implements IGenericDAO<T> {
 		}
 	}
 
-	@Override
-	public T find(long id, final DatabaseType databaseType) {
+	public Object find(Object objectId, final DatabaseType databaseType) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, databaseType);
 		try {
-			return (T) em.find(typeClass, id);
+			return em.find(getObjectType(), objectId);
 		} catch (PersistenceException e) {
 			throw e;
 		} finally {

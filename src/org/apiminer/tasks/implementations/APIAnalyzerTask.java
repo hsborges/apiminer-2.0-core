@@ -1,20 +1,32 @@
 package org.apiminer.tasks.implementations;
 
+import java.io.File;
+import java.util.Date;
 import java.util.HashSet;
 
-import org.apache.log4j.Logger;
+import org.apiminer.SystemProperties;
+import org.apiminer.analyzer.AnalyzerException;
 import org.apiminer.analyzer.api.APIAnalyzer;
 import org.apiminer.daos.DatabaseType;
 import org.apiminer.daos.ProjectDAO;
 import org.apiminer.entities.api.Project;
+import org.apiminer.entities.api.ProjectStatus;
+import org.apiminer.entities.api.Repository;
+import org.apiminer.entities.api.RepositoryType;
 import org.apiminer.tasks.AbstractTask;
 import org.apiminer.tasks.TaskResult;
 import org.apiminer.tasks.TaskStatus;
+import org.apiminer.util.FilesUtil;
+import org.apiminer.util.downloader.DownloaderFactory;
 
 
+/**
+ * Task to analyze and insert an API in the configured database. 
+ * 
+ * @author Hudson S. Borges
+ *
+ */
 public class APIAnalyzerTask extends AbstractTask {
-
-	private final Logger logger = Logger.getLogger(APIAnalyzerTask.class);
 
 	private Project project;
 
@@ -22,16 +34,36 @@ public class APIAnalyzerTask extends AbstractTask {
 	private boolean includePrivate;
 	private boolean includeProtected;
 
-	private APIAnalyzerTask() {
+	protected APIAnalyzerTask() {
 		super();
-		super.status = TaskStatus.WAITING;
-		notifyObservers(TaskStatus.WAITING);
+		this.project = new Project();
+		this.project.setAddedAt(new Date());
+		this.project.setClientOf(null);
 	}
 
-	public APIAnalyzerTask(Project project, boolean includePublic,
-			boolean includePrivate, boolean includeProtected) {
+	public APIAnalyzerTask(String name,
+			String summary,
+			String url,
+			ProjectStatus projectStatus,
+			RepositoryType repositoryType,
+			String urlRepository,
+			boolean includePublic,
+			boolean includePrivate, 
+			boolean includeProtected) {
+		
 		this();
-		this.project = project;
+		
+		this.project.setName(name);
+		this.project.setSummary(summary);
+		this.project.setUrlSite(url);
+		this.project.setProjectStatus(projectStatus);
+		
+		Repository repository = new Repository();
+		repository.setRepositoryType(repositoryType);
+		repository.setUrlAddress(urlRepository);
+		
+		this.project.setRepository(repository);
+		
 		this.includePublic = includePublic;
 		this.includePrivate = includePrivate;
 		this.includeProtected = includeProtected;
@@ -39,40 +71,68 @@ public class APIAnalyzerTask extends AbstractTask {
 
 	@Override
 	public void execute() {
-		super.status = TaskStatus.RUNNING;
-		notifyObservers(TaskStatus.RUNNING);
-
-		ProjectDAO projectDAO = new ProjectDAO();
+		super.setStatus(TaskStatus.RUNNING);
+		
 		try {
-
-			logger.info(String.format("The analyze of the API %s was started.", project.getName()));
-
-			String sourceFilesDirectory = project.getRepository().getSourceFilesDirectory();
-			String[] jarsDependencies = project.getRepository().getJars().toArray(new String[0]);
+			if (new ProjectDAO().findSourceAPI() != null) {
+				throw new AnalyzerException("There is already a registered API");
+			}
+			
+			File localPathFile = null;
+			Repository repository = this.project.getRepository();
+			
+			switch(repository.getRepositoryType()){
+			
+			case COMPRESSED:
+				localPathFile = DownloaderFactory.getCompressedDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
+				break;
+			
+			case GIT:
+				localPathFile = DownloaderFactory.getGitDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
+				break;
+				
+				
+			case LOCAL:
+				localPathFile = new File(repository.getUrlAddress());
+				break;
+			
+			case MERCURIAL:
+				localPathFile = DownloaderFactory.getMercurialDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
+				break;
+			
+			case SUBVERSION:
+				localPathFile = DownloaderFactory.getSubversionDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
+				break;
+			
+			default:
+				break;
+			
+			}
+			
+			repository.setSourceFilesDirectory(localPathFile.getAbsolutePath());
+			repository.setJars(new HashSet<String>(FilesUtil.collectFiles(repository.getSourceFilesDirectory(), ".jar", true)));
+			repository.setProject(project);
 
 			APIAnalyzer jdtParser = new APIAnalyzer(
-					sourceFilesDirectory, jarsDependencies, includePublic,
-					includePrivate, includeProtected);
+					repository.getSourceFilesDirectory(), 
+					repository.getJars().toArray(new String[0]), 
+					includePublic,
+					includePrivate, 
+					includeProtected);
+			
 			jdtParser.parse();
 			
 			project.getRepository().setJars(new HashSet<String>(jdtParser.getJarsDependencies()) );
 			project.setApiClass(jdtParser.getApiClasses());
 			project.setStatistics(jdtParser.getStatistics());
 
-			logger.debug(String.format("Persisting %s API data.", project.getName()));
+			new ProjectDAO().persist(project, DatabaseType.REPLICATED);
 
-			projectDAO.persist(project, DatabaseType.PRE_PROCESSING);
-
-			logger.info("API "+project.getName()+" analyzed.");
-
-			super.result = TaskResult.SUCCESS;
+			super.setResult(TaskResult.SUCCESS);
 		} catch (Throwable throwable) {
-			logger.error(throwable.getLocalizedMessage(), throwable);
-			super.result = TaskResult.FAILURE;
-			super.result.setProblem(throwable);
+			super.setResult(throwable);
 		} finally {
-			super.status = TaskStatus.FINISHED;
-			notifyObservers(TaskStatus.FINISHED);
+			super.setStatus(TaskStatus.FINISHED);
 		}
 		
 	}

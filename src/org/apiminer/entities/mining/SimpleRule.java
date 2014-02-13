@@ -1,5 +1,6 @@
 package org.apiminer.entities.mining;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +19,10 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
-import org.apiminer.daos.interfaces.IEntity;
-
 @SuppressWarnings("serial")
 @Entity
 @Table(name= "SimpleRule")
-public class SimpleRule implements IEntity {
+public class SimpleRule implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

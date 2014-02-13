@@ -1,5 +1,6 @@
 package org.apiminer.entities.api;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,22 +22,19 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import org.apiminer.daos.interfaces.IEntity;
+import org.apiminer.entities.ProjectAnalyserStatistic;
 import org.eclipse.persistence.annotations.ReplicationPartitioning;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Project", uniqueConstraints=@UniqueConstraint(columnNames = "name"))
 @ReplicationPartitioning(name = "Replicate")
-public class Project implements IEntity {
+public class Project implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
-
-	@Column(name = "additional_comments", columnDefinition = "text", nullable = true)
-	private String additionalComments;
 
 	@Column(name = "name", columnDefinition = "varchar(254)", nullable = false)
 	private String name;
@@ -127,14 +125,6 @@ public class Project implements IEntity {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getAdditionalComments() {
-		return additionalComments;
-	}
-
-	public void setAdditionalComments(String additionalComments) {
-		this.additionalComments = additionalComments;
 	}
 
 	public String getName() {

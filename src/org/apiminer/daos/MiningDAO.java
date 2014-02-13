@@ -10,7 +10,7 @@ import org.apiminer.entities.mining.MiningResult;
 import org.apiminer.entities.mining.Rule;
 import org.apiminer.util.DatabaseUtil;
 
-public class MiningDAO extends GenericDAO<MiningResult> {
+public class MiningDAO extends GenericDAO {
 	
 	private EntityManager em;
 
@@ -81,6 +81,11 @@ public class MiningDAO extends GenericDAO<MiningResult> {
 		}else{
 			throw new PersistenceException("No transactions is alive!");
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return MiningResult.class;
 	}
 
 }

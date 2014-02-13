@@ -1,5 +1,7 @@
 package org.apiminer.entities.api;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -11,8 +13,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
-import org.apiminer.daos.interfaces.IEntity;
-
 /**
  * @author hudson
  */
@@ -21,7 +21,7 @@ import org.apiminer.daos.interfaces.IEntity;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "ApiElement")
-public abstract class ApiElement implements IEntity {
+public abstract class ApiElement implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

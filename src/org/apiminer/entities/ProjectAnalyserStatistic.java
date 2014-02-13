@@ -1,4 +1,6 @@
-package org.apiminer.entities.api;
+package org.apiminer.entities;
+
+import java.io.Serializable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,12 +11,12 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.apiminer.daos.interfaces.IEntity;
+import org.apiminer.entities.api.Project;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "ProjectAnalyserStatistic")
-public class ProjectAnalyserStatistic implements IEntity {
+public class ProjectAnalyserStatistic implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

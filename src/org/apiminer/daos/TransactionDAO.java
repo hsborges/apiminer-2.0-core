@@ -6,7 +6,7 @@ import org.apiminer.SystemProperties;
 import org.apiminer.entities.mining.Transaction;
 import org.apiminer.util.DatabaseUtil;
 
-public class TransactionDAO extends GenericDAO<Transaction> {
+public class TransactionDAO extends GenericDAO {
 
 	public long numTotalTransactions(boolean onlyValid) {
 		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, DatabaseType.PRE_PROCESSING);
@@ -24,6 +24,11 @@ public class TransactionDAO extends GenericDAO<Transaction> {
 		}finally{
 			em.close();
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return Transaction.class;
 	}
 
 }

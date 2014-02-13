@@ -1,14 +1,12 @@
 package org.apiminer.tasks.implementations;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
-import org.apiminer.daos.RecommendedCombinationDAO;
-import org.apiminer.entities.example.RecommendedAssociation;
-import org.apiminer.entities.example.RecommendedSet;
+import org.apiminer.daos.DatabaseType;
+import org.apiminer.daos.GenericDAO;
+import org.apiminer.entities.example.Recommendation;
 import org.apiminer.entities.mining.MiningResult;
-import org.apiminer.recommendation.AbstractRecommenderCriteria;
-import org.apiminer.recommendation.associations.CombinationRecommender;
+import org.apiminer.recommendation.associations.AssociationsRecommender;
 import org.apiminer.tasks.AbstractTask;
 import org.apiminer.tasks.TaskResult;
 import org.apiminer.tasks.TaskStatus;
@@ -16,40 +14,36 @@ import org.apiminer.tasks.TaskStatus;
 public class PatternsRecommenderTask extends AbstractTask {
 	
 	private MiningResult miningResult;
-	private List<AbstractRecommenderCriteria<RecommendedSet>> criterias;
-	private int itemsetMaxSize;
 	
-	public PatternsRecommenderTask(MiningResult miningResult,
-			List<AbstractRecommenderCriteria<RecommendedSet>> criterias,
-			int itemsetMaxSize) {
+	public PatternsRecommenderTask(MiningResult miningResult) {
 		super();
 		this.miningResult = miningResult;
-		this.criterias = criterias;
-		this.itemsetMaxSize = itemsetMaxSize;
 	}
 
 	@Override
 	public void execute() {
-		super.status  = TaskStatus.RUNNING;
-		super.notifyObservers(TaskStatus.RUNNING);
+		super.setStatus(TaskStatus.RUNNING);
 		
-		CombinationRecommender recommender = new CombinationRecommender(miningResult.getId());
-		for (AbstractRecommenderCriteria<RecommendedSet> criteria : criterias) {
-			recommender.addCriteria(criteria);
-		}
+		AssociationsRecommender recommender = new AssociationsRecommender(miningResult);
 
 		try {
-			List<RecommendedAssociation> all = recommender.findAllRecommendedCombination(itemsetMaxSize);
-			new RecommendedCombinationDAO().persistOnBatch(all);
-			super.result = TaskResult.SUCCESS;
+			GenericDAO dao = new GenericDAO() {
+				@Override
+				public Class<?> getObjectType() {
+					return Recommendation.class;
+				}
+			};
+			
+			for (Recommendation recomendation : recommender.findAllRecommendedAssociations()) {
+				dao.persist(recomendation, DatabaseType.EXAMPLES);
+			}
+			
+			super.setResult(TaskResult.SUCCESS);
 		} catch (Exception e) {
-			super.result = TaskResult.FAILURE;
-			super.result.setProblem(e);
+			super.setResult(e);
 		} finally {
-			super.status = TaskStatus.FINISHED;
-			super.notifyObservers(TaskStatus.FINISHED);
+			super.setStatus(TaskStatus.FINISHED);
 		}
-		
 	}
 
 	@Override

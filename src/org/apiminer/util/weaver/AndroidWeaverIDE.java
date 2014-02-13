@@ -11,11 +11,12 @@ import java.util.Stack;
 import org.apiminer.daos.ApiMethodDAO;
 import org.apiminer.daos.DatabaseType;
 import org.apiminer.daos.ExampleDAO;
-import org.apiminer.daos.RecommendedCombinationDAO;
+import org.apiminer.daos.GenericDAO;
+import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.ApiMethod;
+import org.apiminer.entities.example.AssociatedElement;
 import org.apiminer.entities.example.Example;
-import org.apiminer.entities.example.RecommendedAssociation;
-import org.apiminer.entities.example.RecommendedSet;
+import org.apiminer.entities.example.Recommendation;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -61,9 +62,16 @@ public class AndroidWeaverIDE {
 								desc.appendElement("br");
 								desc.appendElement("p").appendElement("pre").text(exampleStr.substring(1, exampleStr.length()-1));
 								
-								RecommendedAssociation combination = new RecommendedCombinationDAO().find(String.format("[%d]", method.getId()));
-								if (combination != null && !combination.getRecommendedSets().isEmpty()) {
-									RecommendedSet rs = combination.getRecommendedSets().get(0);
+								GenericDAO  dao = new GenericDAO() {
+									@Override
+									public Class<?> getObjectType() {
+										return Recommendation.class;
+									}
+								};
+								
+								Recommendation combination = (Recommendation) dao.find(method, DatabaseType.EXAMPLES);
+								if (combination != null && !combination.getAssociatedElements().isEmpty()) {
+									AssociatedElement rs = combination.getAssociatedElements().get(0);
 									if (rs.getRecommendedExamples().isEmpty()) {
 										Element b = desc.appendElement("b");
 										b.text("Example provided by ");
@@ -82,15 +90,19 @@ public class AndroidWeaverIDE {
 										goTo = goTo.concat("../");
 									}
 										
-									Iterator<ApiMethod> it = rs.getMethodSet().iterator();
+									Iterator<ApiElement> it = rs.getElements().iterator();
 									while(it.hasNext()) {
-										ApiMethod next = it.next();
-										String name = next.getFullName().replace(next.getApiClass().getName(), next.getApiClass().getName().replace(".", "/"));
+										ApiElement next = it.next();
+										
+										if (!(next instanceof ApiMethod))
+											continue;
+											
+										String name = ((ApiMethod) next).getFullName().replace(((ApiMethod) next).getApiClass().getName(), ((ApiMethod) next).getApiClass().getName().replace(".", "/"));
 										
 										name = name.substring(0, name.substring(0, name.lastIndexOf("(")-1).lastIndexOf("."));
 										
 										Element a = desc.appendElement("b").appendElement("a");
-										a.text(it.hasNext() ? next.getSimpleFullName()+", " : next.getSimpleFullName());
+										a.text(it.hasNext() ? ((ApiMethod) next).getSimpleFullName()+", " : ((ApiMethod) next).getSimpleFullName());
 										a.attr("href", goTo.concat(name.concat(".html")));
 										
 									}

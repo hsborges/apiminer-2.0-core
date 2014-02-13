@@ -1,8 +1,6 @@
 package org.apiminer.tasks.implementations;
 
-import java.io.File;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -12,64 +10,37 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.apiminer.SystemProperties;
 import org.apiminer.builder.IBuilder;
-import org.apiminer.daos.DatabaseType;
 import org.apiminer.daos.ExampleDAO;
-import org.apiminer.daos.ProjectDAO;
 import org.apiminer.entities.ProjectAnalyserStatistic;
 import org.apiminer.entities.api.ApiClass;
 import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.Project;
-import org.apiminer.entities.api.ProjectStatus;
 import org.apiminer.entities.api.Repository;
-import org.apiminer.entities.api.RepositoryType;
 import org.apiminer.entities.example.Example;
 import org.apiminer.extractor.ExampleExtractor;
 import org.apiminer.tasks.AbstractTask;
 import org.apiminer.tasks.TaskResult;
 import org.apiminer.tasks.TaskStatus;
 import org.apiminer.util.BuilderUtil;
-import org.apiminer.util.FilesUtil;
-import org.apiminer.util.downloader.DownloaderFactory;
 
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.CosineSimilarity;
 
 
-public class ExampleExtractorTask extends AbstractTask {
+public class ExampleReExtractorTask extends AbstractTask {
 	
-	private Logger LOGGER = Logger.getLogger(ExampleExtractorTask.class);
+	private Logger LOGGER = Logger.getLogger(ExampleReExtractorTask.class);
 
 	private Project project;
 
-	private ExampleExtractorTask() {
+	private ExampleReExtractorTask() {
 		super();
-		
-		this.project = new Project();
-		this.project.setAddedAt(new Date());
-		this.project.setClientOf(new ProjectDAO().findSourceAPI());
 	}
 
-	public ExampleExtractorTask(String name,
-			String summary,
-			String url,
-			ProjectStatus projectStatus,
-			RepositoryType repositoryType,
-			String urlRepository) {
-		
+	public ExampleReExtractorTask(Project project) {
 		this();
-		
-		this.project.setName(name);
-		this.project.setProjectStatus(projectStatus);
-		this.project.setSummary(summary);
-		this.project.setUrlSite(url);
-		
-		Repository repository = new Repository();
-		repository.setRepositoryType(repositoryType);
-		repository.setUrlAddress(urlRepository);
-		
-		this.project.setRepository(repository);
+		this.project = project;
 	}
 	
 	@Override
@@ -77,46 +48,7 @@ public class ExampleExtractorTask extends AbstractTask {
 		super.setStatus(TaskStatus.RUNNING);
 		
 		try {
-			if (new ProjectDAO().find(project.getName().trim(), DatabaseType.EXAMPLES) != null) {
-				throw new IllegalArgumentException("Project already registred!");
-			}
-
 			Repository repository = project.getRepository();
-			
-			File localPathFile = null;
-			
-			LOGGER.debug("Downloading source files from repository");
-			switch(repository.getRepositoryType()){
-			
-			case COMPRESSED:
-				localPathFile = DownloaderFactory.getCompressedDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
-				break;
-			
-			case GIT:
-				localPathFile = DownloaderFactory.getGitDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
-				break;
-				
-				
-			case LOCAL:
-				localPathFile = new File(repository.getUrlAddress());
-				break;
-			
-			case MERCURIAL:
-				localPathFile = DownloaderFactory.getMercurialDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
-				break;
-			
-			case SUBVERSION:
-				localPathFile = DownloaderFactory.getSubversionDownloader().download(project.getName(), repository.getUrlAddress(), SystemProperties.WORKING_DIRECTORY.getAbsolutePath());
-				break;
-			
-			default:
-				break;
-			
-			}
-			
-			repository.setSourceFilesDirectory(localPathFile.getAbsolutePath());
-			repository.setJars(new HashSet<String>(FilesUtil.collectFiles(repository.getSourceFilesDirectory(), ".jar", true)));
-			
 			
 			LOGGER.debug("Building files using default builders");
 			Set<Class<? extends IBuilder>> defaultBuilders = BuilderUtil.getBuilders();
@@ -160,7 +92,7 @@ public class ExampleExtractorTask extends AbstractTask {
 			
 			LOGGER.debug("Persisting client " + project.getName());
 			
-			new ExampleDAO().persist(project, examples);
+			new ExampleDAO().changeExamples(project.getId(), examples);
 			
 			super.setResult(TaskResult.SUCCESS);
 		} catch (Throwable throwable) {

@@ -7,7 +7,7 @@ package org.apiminer.recommendation;
  * @author Hudson S. Borges
  * @param <T>
  */
-interface IRecommenderCriteria<T> {
+public interface IRecommenderCriteria<T> {
 	
 	/**
 	 * @return Peso do critério

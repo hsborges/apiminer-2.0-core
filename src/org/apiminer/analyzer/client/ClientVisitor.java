@@ -11,12 +11,12 @@ import java.util.Set;
 
 import org.apiminer.daos.ApiMethodDAO;
 import org.apiminer.daos.DatabaseType;
+import org.apiminer.entities.ProjectAnalyserStatistic;
 import org.apiminer.entities.api.ApiClass;
 import org.apiminer.entities.api.ApiElement;
 import org.apiminer.entities.api.ApiEnum;
 import org.apiminer.entities.api.ApiMethod;
 import org.apiminer.entities.api.Project;
-import org.apiminer.entities.api.ProjectAnalyserStatistic;
 import org.apiminer.entities.mining.Transaction;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;

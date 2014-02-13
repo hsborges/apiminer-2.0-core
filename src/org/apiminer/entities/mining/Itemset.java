@@ -1,5 +1,6 @@
 package org.apiminer.entities.mining;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -13,13 +14,12 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import org.apiminer.daos.interfaces.IEntity;
 import org.apiminer.entities.api.ApiMethod;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "Itemset")
-public class Itemset implements IEntity {
+public class Itemset implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

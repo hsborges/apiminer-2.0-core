@@ -1,5 +1,6 @@
 package org.apiminer.entities.example;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -14,8 +15,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apiminer.daos.interfaces.IEntity;
-
 /**
  * The persistent class for the example_feedback database table.
  * 
@@ -23,7 +22,7 @@ import org.apiminer.daos.interfaces.IEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "ApiExampleFeedback")
-public class ExampleFeedback implements IEntity {
+public class ExampleFeedback implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

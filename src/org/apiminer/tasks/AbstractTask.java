@@ -2,10 +2,14 @@ package org.apiminer.tasks;
 
 import java.util.Observable;
 
+/**
+ * @author Hudson S. Borges
+ *
+ */
 public abstract class AbstractTask extends Observable {
 
-	protected TaskResult result = null;
-	protected TaskStatus status = TaskStatus.WAITING;
+	private TaskResult result = null;
+	private TaskStatus status = TaskStatus.WAITING;
 
 	public abstract void execute();
 	
@@ -27,6 +31,22 @@ public abstract class AbstractTask extends Observable {
 		return status;
 	}
 
+	public void setResult(TaskResult result) {
+		this.result = result;
+		this.notifyObservers(this.result);
+	}
+
+	public void setStatus(TaskStatus status) {
+		this.status = status;
+		this.notifyObservers(this.status);
+	}
+	
+	public void setResult(Throwable throwable) {
+		this.result = TaskResult.FAILURE;
+		this.result.setProblem(throwable);
+		this.notifyObservers(this.result);
+	}
+	
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
@@ -34,5 +54,4 @@ public abstract class AbstractTask extends Observable {
 			result.getProblem().printStackTrace();
 		}
 	}
-
 }

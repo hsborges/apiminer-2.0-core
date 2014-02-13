@@ -2,3 +2,6 @@
 /apiminer2.log
 /.metadata
 /dist
+/.settings
+/.classpath
+/.project

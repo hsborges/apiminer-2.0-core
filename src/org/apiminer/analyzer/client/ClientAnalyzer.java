@@ -9,9 +9,9 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apiminer.analyzer.AnalyzerException;
+import org.apiminer.entities.ProjectAnalyserStatistic;
 import org.apiminer.entities.api.ApiClass;
 import org.apiminer.entities.api.Project;
-import org.apiminer.entities.api.ProjectAnalyserStatistic;
 import org.apiminer.util.FilesUtil;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;

@@ -5,11 +5,15 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 
 import org.apiminer.daos.Database;
 import org.apiminer.daos.DatabaseType;
+import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.eclipse.persistence.config.TargetDatabase;
+import org.eclipse.persistence.logging.SessionLog;
 
 public class DatabaseUtil {
 	
@@ -43,38 +47,19 @@ public class DatabaseUtil {
 			throw new PersistenceException("Database properties not configured!");
 		}
 		
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("javax.persistence.jdbc.driver", DATABASE.getDriverClass());
-		properties.put("javax.persistence.jdbc.url", DATABASE.getPreProcessingUrl());
-		properties.put("javax.persistence.jdbc.user", DATABASE.getUsername());
-		properties.put("javax.persistence.jdbc.password", DATABASE.getPassword());
+		Map<String, Object> properties = getProperties(DATABASE);
+		properties.put(PersistenceUnitProperties.JDBC_URL, DATABASE.getPreProcessingUrl());
 		
-		properties.put("eclipselink.connection-pool.default.initial", "1");
-		properties.put("eclipselink.connection-pool.default.min", "64");
-		properties.put("eclipselink.connection-pool.default.max", "64");
+		properties.put(PersistenceUnitProperties.PARTITIONING, "Replicate");
 		
-		properties.put("eclipselink.connection-pool.node2.driver", DATABASE.getDriverClass());
-		properties.put("eclipselink.connection-pool.node2.url", DATABASE.getExamplesUrl());
-		properties.put("eclipselink.connection-pool.node2.user", DATABASE.getUsername());
-		properties.put("eclipselink.connection-pool.node2.password", DATABASE.getPassword());
-		properties.put("eclipselink.connection-pool.node2.initial", "1");
-		properties.put("eclipselink.connection-pool.node2.min", "64");
-		properties.put("eclipselink.connection-pool.node2.max", "64");
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.driver", DATABASE.getDriverClass());
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.url", DATABASE.getExamplesUrl());
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.user", DATABASE.getUsername());
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.password", DATABASE.getPassword());
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.initial", "1");
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.min", "64");
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL+"node2.max", "64");
 
-		properties.put("eclipselink.partitioning", "Replicate");
-
-		properties.put("eclipselink.ddl-generation.output-mode", "database");
-		properties.put("eclipselink.target-database", DATABASE.getName());
-		properties.put("eclipselink.logging.level", "SEVERE");
-		
-		properties.put("eclipselink.jdbc.batch-writing", "JDBC");
-		properties.put("eclipselink.cache.size.default", "1000");
-		properties.put("eclipselink.persistence-context.flush-mode", "commit");
-		
-		if (DATABASE.isAutoUpdate()) {
-			properties.put("eclipselink.ddl-generation", "create-or-extend-tables");
-		}
-		
 		R_FACTORY = Persistence.createEntityManagerFactory("replicated", properties);
 	}
 	
@@ -110,34 +95,41 @@ public class DatabaseUtil {
 			closeConnections();
 		}
 		
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("javax.persistence.jdbc.driver", database.getDriverClass());
-		properties.put("javax.persistence.jdbc.user", database.getUsername());
-		properties.put("javax.persistence.jdbc.password", database.getPassword());
-		
-		properties.put("eclipselink.connection-pool.default.initial", "1");
-		properties.put("eclipselink.connection-pool.default.min", "64");
-		properties.put("eclipselink.connection-pool.default.max", "64");
-		
-		properties.put("eclipselink.ddl-generation.output-mode", "database");
-		properties.put("eclipselink.target-database", database.getName());
-		properties.put("eclipselink.logging.level", "SEVERE");
-		
-		properties.put("eclipselink.jdbc.batch-writing", "JDBC");
-		properties.put("eclipselink.cache.size.default", "1000");
-		properties.put("eclipselink.persistence-context.flush-mode", "commit");
-		
-		if (database.isAutoUpdate()) {
-			properties.put("eclipselink.ddl-generation", "create-or-extend-tables");
-		}
-		
+		Map<String, Object> properties = getProperties(database);
 		properties.put("javax.persistence.jdbc.url", database.getExamplesUrl());
 		DatabaseUtil.E_FACTORY = Persistence.createEntityManagerFactory("examples", properties);
+		
+		properties = getProperties(database);
 		properties.put("javax.persistence.jdbc.url", database.getPreProcessingUrl());
 		DatabaseUtil.PP_FACTORY = Persistence.createEntityManagerFactory("pre-processing", properties);
+		
 		DatabaseUtil.DATABASE = database;
 		
 		buildReplicatedEntityManagerFactory();
+	}
+
+	private static Map<String, Object> getProperties(Database database) {
+		Map<String, Object> properties = new HashMap<String, Object>();
+		properties.put(PersistenceUnitProperties.JDBC_DRIVER, database.getDriverClass());
+		properties.put(PersistenceUnitProperties.JDBC_USER, database.getUsername());
+		properties.put(PersistenceUnitProperties.JDBC_PASSWORD, database.getPassword());
+		
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL_INITIAL, "1");
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL_MIN, "64");
+		properties.put(PersistenceUnitProperties.CONNECTION_POOL_MAX, "64");
+		
+		properties.put(PersistenceUnitProperties.DDL_GENERATION_MODE, PersistenceUnitProperties.DDL_DATABASE_GENERATION);
+		properties.put(PersistenceUnitProperties.TARGET_DATABASE, TargetDatabase.Auto);
+		properties.put(PersistenceUnitProperties.LOGGING_LEVEL, SessionLog.SEVERE_LABEL);
+		
+		properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
+		properties.put(PersistenceUnitProperties.CACHE_SIZE_DEFAULT, "1000");
+		properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, FlushModeType.COMMIT.name());
+		
+		if (database.isAutoUpdate()) {
+			properties.put("eclipselink.ddl-generation", PersistenceUnitProperties.CREATE_OR_EXTEND);
+		}
+		return properties;
 	}
 
 	public static Database getDatabase() {

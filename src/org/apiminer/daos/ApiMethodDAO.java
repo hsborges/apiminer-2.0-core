@@ -10,7 +10,7 @@ import org.apiminer.SystemProperties;
 import org.apiminer.entities.api.ApiMethod;
 import org.apiminer.util.DatabaseUtil;
 
-public class ApiMethodDAO extends GenericDAO<ApiMethod> {
+public class ApiMethodDAO extends GenericDAO {
 
 	public List<ApiMethod> findUsedMethods(Integer supportMin) {
 
@@ -107,6 +107,11 @@ public class ApiMethodDAO extends GenericDAO<ApiMethod> {
 		}finally{
 			em.close();
 		}
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return ApiMethod.class;
 	}
 
 }
