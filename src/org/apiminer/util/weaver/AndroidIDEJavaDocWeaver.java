@@ -23,9 +23,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 //TODO improve it
-public class AndroidWeaverIDE {
+public class AndroidIDEJavaDocWeaver {
 	
-	public static void instrumentJavaDoc(String inputFile, String outputFile) throws IOException {
+	private static void addTags(String inputFile, String outputFile) throws IOException {
 		Document jsoup = Jsoup.parse(new File(inputFile),"UTF-8");
 		
 		String className = null;
@@ -162,7 +162,7 @@ public class AndroidWeaverIDE {
 					outputFile.getParentFile().mkdirs();
 				}
 				if (inputFile.getName().toLowerCase().endsWith(".html")) {
-					instrumentJavaDoc(inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+					addTags(inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 				}else{
 					copyFiles(inputFile, outputFile);
 				}

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.jdt.compiler.apt_1.0.300.v20100513-0845.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.jdt.ui_3.6.2.r362_v20110203.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.text_3.5.0.v20100601-1300.jar"/>
@@ -17,5 +18,5 @@
 	<classpathentry kind="lib" path="lib/simmetrics_jar_v1_6_2_d07_02_07.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=apiminer2-core&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
-	<classpathentry kind="output" path="target/classes"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

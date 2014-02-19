@@ -1,24 +1,21 @@
 package org.apiminer;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.apiminer.daos.Database;
 
 /**
- * Classe responsável por armazenar as propriedades do sistema.
+ * Class responsible to storing the system properties
  * 
  * @author Hudson S. Borges
  *
  */
 public final class SystemProperties {
 	
-	public static final File DATA_DIR = new File("data");
-	public static final File PROPERTIES_FILE = new File(DATA_DIR, "user.properties");
-	public static final File DATABASE_PROPERTIES_FILE = new File(DATA_DIR, "database.properties");
+	public static final String USER_PROPERTIES_FILE = "user.properties";
+	public static final String DATABASE_PROPERTIES_FILE = "database.properties";
 	
 	public static File WORKING_DIRECTORY;
 	public static Integer MAX_THREADS;
@@ -40,13 +37,13 @@ public final class SystemProperties {
 	private static final String DATABASE_AUTO_UPDATE_KEY = "database.autoUpdate";
 	
 	static {
-		// Carrega as propriedades do usuário
+		// Load the user properties
 		try {
 			load();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// Carrega as propriedades da base de dados
+		// Load the database properties
 		try {
 			loadDatabaseProperties();
 		} catch (IOException e) {
@@ -54,37 +51,23 @@ public final class SystemProperties {
 		}
 	}
 	
-	public static void save() throws IOException {
-		Properties properties = new Properties();
-		properties.load(new FileReader(PROPERTIES_FILE));
-		properties.setProperty(WORKING_DIRECTORY_KEY, WORKING_DIRECTORY.getAbsolutePath());
-		properties.setProperty(MAX_THREADS_KEY, Integer.toString(MAX_THREADS));
-		properties.store(new FileOutputStream(PROPERTIES_FILE, false), null);
-	}
-	
 	public static void load() throws IOException {
-		// Verifica se o arquivo com as propriedades existe, se não existe ele é criado.
-		if (!PROPERTIES_FILE.exists()) {
-			PROPERTIES_FILE.getParentFile().mkdirs();
-			PROPERTIES_FILE.createNewFile();
-		}
-		
-		// Carrega as propriedades
+		// Load the properties from the file
 		Properties properties = new Properties();
-		properties.load(new FileReader(PROPERTIES_FILE));
+		properties.load(SystemProperties.class.getClassLoader().getResourceAsStream(USER_PROPERTIES_FILE));
 		
-		// Recupera as propriedades
+		// Set the properties
 		String workingDirectoryProperty = properties.getProperty(WORKING_DIRECTORY_KEY);
 		String maxThreadsProperty = properties.getProperty(MAX_THREADS_KEY);
 		
-		// Configura o diretorio de trabalho
+		// Configure the working directory
 		try {
 			WORKING_DIRECTORY = new File(workingDirectoryProperty);
 		} catch (Exception e1) {
 			WORKING_DIRECTORY = null;
 		}
 		
-		// Configura o numero maximo de Threads
+		// Configure the max number of threads
 		try {
 			MAX_THREADS = Integer.parseInt(maxThreadsProperty);
 		} catch (NumberFormatException e) {
@@ -93,32 +76,11 @@ public final class SystemProperties {
 		
 	}
 	
-	public static void saveDatabaseProperties() throws IOException {
-		Properties properties = new Properties();
-		properties.put(DATABASE_NAME_KEY, DATABASE.getName());
-		properties.put(DATABASE_DRIVER_CLASS_KEY, DATABASE.getDriverClass());
-		properties.put(DATABASE_DIALECT_KEY, DATABASE.getDialect());
-		properties.put(DATABASE_USERNAME_KEY, DATABASE.getUsername());
-		properties.put(DATABASE_PASSWORD_KEY, DATABASE.getPassword());
-		properties.put(DATABASE_PRE_PROCESSING_SCHEMA_NAME_KEY, DATABASE.getPreProcessingSchema());
-		properties.put(DATABASE_EXAMPLES_SCHEMA_NAME_KEY, DATABASE.getExamplesSchema());
-		properties.put(DATABASE_ADDRESS_KEY, DATABASE.getAddress());
-		properties.put(DATABASE_PORT_KEY, DATABASE.getPort().toString());
-		properties.put(DATABASE_AUTO_UPDATE_KEY, Boolean.toString(DATABASE.isAutoUpdate()));
-		properties.store(new FileOutputStream(DATABASE_PROPERTIES_FILE, false), null);
-	}
-	
 	public static void loadDatabaseProperties() throws IOException {
-		// Verifica se o arquivo com as propriedades existe, se não existe ele é criado.
-		if (!DATABASE_PROPERTIES_FILE.exists()) {
-			DATABASE_PROPERTIES_FILE.getParentFile().mkdirs();
-			DATABASE_PROPERTIES_FILE.createNewFile();
-		}
-		
 		Properties properties = new Properties();
-		properties.load(new FileReader(DATABASE_PROPERTIES_FILE));
+		properties.load(SystemProperties.class.getClassLoader().getResourceAsStream(DATABASE_PROPERTIES_FILE));
 		
-		// Configurando as propriedades
+		// Configure the database properties
 		DATABASE = new Database();
 		DATABASE.setName(properties.getProperty(DATABASE_NAME_KEY, null));
 		DATABASE.setDriverClass(properties.getProperty(DATABASE_DRIVER_CLASS_KEY, null));

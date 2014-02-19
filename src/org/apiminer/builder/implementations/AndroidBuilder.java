@@ -23,7 +23,7 @@ import org.apiminer.util.FilesUtil;
  */
 public class AndroidBuilder implements IBuilder {
 
-	private static final File PROPERTIES_FILE = new File(SystemProperties.DATA_DIR,"android-builder.properties"); 
+	private static final File PROPERTIES_FILE = new File(SystemProperties.class.getClassLoader().getResource("android-builder.properties").getFile()); 
 	
 	private Properties properties = new Properties();
 	
