@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -2397,9 +2398,9 @@ public class ASTUtil {
 		return null;
 
 	}
-
+	
 	public static void removeEmptyBlocks(Block block){
-
+		
 		class InternalVisitor extends ASTVisitor {
 			@Override
 			public void endVisit(Block node) {

@@ -146,7 +146,7 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 		
 		ASTNode newAST = ASTUtil.copyStatements(node.getBody(), relatedStatements, AST.newAST(AST.JLS3));
 		if (!relatedStatements.isEmpty()) {
-			LOGGER.error("Some Statements are not included!");
+			LOGGER.error("Some statements were not included!");
 		}
 
 		if (newAST == null) { 
@@ -225,12 +225,14 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 			codeExample = codeExample.replace(line, line.replace("\n", "").concat("  ").concat("//initialized previously").concat("\n"));
 		}
 		
+		//FIXME
+		codeExample = codeExample.replaceAll("(\\{\n)(\\s+)(\\})", "$1 //do something \n$3");
+		
 		try {
 			example.setCodeExample(codeExample);
 			example.setFormattedCodeExample(ASTUtil.codeFormatter(codeExample));
 		} catch (Exception e) {
 			LOGGER.error(e);
-			e.printStackTrace();
 			if (example.getFormattedCodeExample() == null) {
 				example.setFormattedCodeExample(codeExample);
 			}

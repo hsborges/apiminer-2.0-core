@@ -22,6 +22,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
@@ -66,6 +67,7 @@ public class Example implements Serializable {
 	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "Example_Seed")
 	@OrderColumn(name = "seed_index")
+	@Lob
 	private List<String> seeds;
 
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)

@@ -43,7 +43,7 @@
 		<dependency org="postgresql" name="postgresql" rev="9.1-901.jdbc4"/>
 		<dependency org="org.sonatype.tycho" name="org.eclipse.jdt.core" rev="3.6.1.v_A68_R36x"/>
 		<dependency org="org.jsoup" name="jsoup" rev="1.7.2"/>
-		<dependency org="org.reflections" name="reflections" rev="0.9.8"/>
+		<dependency org="org.reflections" name="reflections" rev="0.9.9-RC1"/>
 		<dependency org="hsqldb" name="hsqldb" rev="1.8.0.10"/>
 		<dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.3.1"/>
 	</dependencies>
