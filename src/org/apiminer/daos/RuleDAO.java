@@ -63,6 +63,15 @@ public class RuleDAO extends GenericDAO {
 			em.close();
 		}
 	}
+	
+	public List<Rule> findInterestingRules() {
+		EntityManager em = DatabaseUtil.getEntityManager(SystemProperties.DATABASE, DatabaseType.PRE_PROCESSING);
+		try {
+			 return em.createQuery("SELECT r FROM Rule r JOIN r.premise p WHERE SIZE(p.elements) = 1", Rule.class).getResultList();
+		} finally {
+			em.close();
+		}
+	}
 
 	@Override
 	public Class<?> getObjectType() {

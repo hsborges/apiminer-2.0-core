@@ -15,7 +15,7 @@ public class LoggerUtil {
 	 */
 	public synchronized static final void logEvents() {
 		try {
-			LogManager.getRootLogger().setLevel(Level.DEBUG);
+			LogManager.getRootLogger().setLevel(Level.INFO);
 			LogManager.getRootLogger().addAppender(new ConsoleAppender(new PatternLayout("%d{ABSOLUTE} %5p - %m%n")));
 			LogManager.getRootLogger().addAppender(new FileAppender(new PatternLayout("%d{ABSOLUTE} %5p %c{1}:%L - %m%n"), "apiminer-log.txt"));
 		} catch (IOException e) {

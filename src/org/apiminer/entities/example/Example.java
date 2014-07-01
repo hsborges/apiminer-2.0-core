@@ -102,7 +102,7 @@ public class Example implements Serializable {
 	@OrderBy("addedAt")
 	private List<ExampleFeedback> feedbacks;
 	
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy="recommendedExamples") 
+	@ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy="recommendedExamples") 
 	@JoinTable(name = "RecommendedSet_Example", 
 		joinColumns=@JoinColumn(name = "example_id"),
 		inverseJoinColumns=@JoinColumn(name = "recommended_set_id")
@@ -119,15 +119,14 @@ public class Example implements Serializable {
 	
 	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "Example_Problems")
-	@OrderColumn(name = "index")
-	private List<Integer> problems;
+	private Set<Integer> problems;
 
 	public Example() {
 		super();
 		this.metrics = new HashMap<String, Integer>();
 		this.seeds = new LinkedList<String>();
 		this.imports = new HashSet<String>();
-		this.problems = new LinkedList<Integer>();
+		this.problems = new HashSet<Integer>();
 	}
 
 	public Date getAddedAt() {
@@ -265,11 +264,11 @@ public class Example implements Serializable {
 		this.imports = imports;
 	}
 
-	public List<Integer> getProblems() {
+	public Set<Integer> getProblems() {
 		return problems;
 	}
 
-	public void setProblems(List<Integer> problems) {
+	public void setProblems(Set<Integer> problems) {
 		this.problems = problems;
 	}
 

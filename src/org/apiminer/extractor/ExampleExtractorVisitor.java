@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -102,7 +103,7 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 		});
 		
 		Stack<Rule> rules = new Stack<Rule>();
-		rules.addAll(new RuleDAO().findAll());
+		rules.addAll(new RuleDAO().findInterestingRules());
 		while (!rules.isEmpty()) {
 			Rule r = rules.pop();
 			Set<ApiMethod> methods = new HashSet<ApiMethod>();
@@ -404,10 +405,11 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 						// Faço a extração de exemplos para cada invocação em separado
 						Set<ApiMethod> methodsInvocations = new HashSet<ApiMethod>();
 						for (Expression mi : invocations) {
-							methodsInvocations.add(this.mapInvocations.get(mi));
+							ApiMethod apiMethod = this.mapInvocations.get(mi);
+							methodsInvocations.add(apiMethod);
 							Example newExample = makeExample(declaration, 
 									Collections.singleton(mi), 
-									Collections.singletonList(this.mapInvocations.get(mi)));
+									Collections.singletonList(apiMethod));
 							if (newExample != null) {
 								this.examples.add(newExample);
 							}
@@ -559,22 +561,10 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 	
 	private class InvocationVisitor extends ASTVisitor {
 		
-		private List<Expression> invocations = new LinkedList<Expression>();
+		private LinkedList<Expression> invocations = new LinkedList<Expression>();
 		
 		@Override
-		public boolean visit(MethodInvocation methodInvocation) {
-			// Se não for possível fazer o binding, este método não será da API analisada
-			// já que a api foi incluida. Além disse as informações obtidas a partir desse 
-			// método não são precisas e as vezes são incorretas
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			if (methodBinding != null) {
-				invocationHandler(methodBinding, methodInvocation);
-			}
-			return super.visit(methodInvocation);
-		}
-
-		@Override
-		public boolean visit(ClassInstanceCreation node) {
+		public void endVisit(ClassInstanceCreation node) {
 			// Se não for possível fazer o binding, este método não será da API analisada
 			// já que a api foi incluida. Além disse as informações obtidas a partir desse 
 			// método não são precisas e as vezes são incorretas
@@ -582,8 +572,25 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 			if (methodBinding != null) {
 				invocationHandler(methodBinding, node);
 			}
-			return super.visit(node);
 		}
+		
+		@Override
+		public void endVisit(MethodInvocation methodInvocation) {
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			if (methodBinding != null) {
+				invocationHandler(methodBinding, methodInvocation);
+			}
+		}
+		
+		@Override
+		public void endVisit(SuperMethodInvocation node) {
+			IMethodBinding methodBinding = node.resolveMethodBinding();
+			if (methodBinding != null) {
+				invocationHandler(methodBinding, node);
+			}
+		}
+
+		
 		
 		private void invocationHandler(IMethodBinding methodBinding, Expression invocation){
 			// Obtenho informações da invocação, como nome do metodo, classe e argumentos
@@ -599,7 +606,7 @@ public class ExampleExtractorVisitor extends ASTVisitor {
 
 			// Se o método esta presente na API analisada, esta invocação é incluída
 			if (apiMethod != null) {
-				this.invocations.add(invocation);
+				this.invocations.addLast(invocation);
 				mapInvocations.put(invocation, apiMethod);
 			}
 		}

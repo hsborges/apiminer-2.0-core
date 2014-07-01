@@ -1,5 +1,7 @@
 package org.apiminer.daos;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -123,6 +125,11 @@ public class ExampleDAO extends GenericDAO {
 			//Commit the transaction
 			em.getTransaction().commit();
 		}catch(PersistenceException e){
+			try {
+				e.printStackTrace(new PrintStream("error.txt"));
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
 			em.getTransaction().rollback();
 			throw e;
 		}finally{

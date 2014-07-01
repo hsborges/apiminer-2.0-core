@@ -18,52 +18,58 @@ public class JavaDocWeaver {
 		
 		Element head = jsoup.getElementsByTag("head").first();
 		
-		Element syntaxTheme = head.appendElement("link")
-				.attr("href", "http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css")
-				.attr("rel", "stylesheet")
-				.attr("type", "text/css");
+		/** jQuery scripts **/
 		
-		Element syntaxCore = head.appendElement("script")
+		
+		head.appendElement("script")
+			.attr("src", "http://code.jquery.com/jquery-1.11.0.min.js");
+		
+		head.appendElement("script")
+			.attr("src", "http://code.jquery.com/ui/1.10.3/jquery-ui.min.js");
+		
+		head.appendElement("link")
+			.attr("href", "http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
+			.attr("rel", "stylesheet")
+			.attr("type", "text/css");
+		
+		/** Code Highlight scripts **/
+		
+		head.appendElement("script")
 			.attr("src", "http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js");
 		
-		Element syntaxBrush = head.appendElement("script")
-				.attr("src", "http://alexgorbatchev.com/pub/sh/current/scripts/shBrushJava.js");
+		head.appendElement("script")
+			.attr("src", "http://alexgorbatchev.com/pub/sh/current/scripts/shBrushJava.js");
 		
-		head.appendChild(syntaxTheme);
-		head.appendChild(syntaxCore);
-		head.appendChild(syntaxBrush);
+		head.appendElement("link")
+			.attr("href", "http://alexgorbatchev.com/pub/sh/current/styles/shCore.css")
+			.attr("rel", "stylesheet")
+			.attr("type", "text/css");
 		
-		Element jquery = head.appendElement("script")
-				.attr("src", "http://code.jquery.com/jquery-1.11.0.min.js");
-			
-		Element jqueryMigrate = head.appendElement("script")
-				.attr("src", "http://code.jquery.com/jquery-migrate-1.2.1.min.js");
+		head.appendElement("link")
+			.attr("href", "http://alexgorbatchev.com/pub/sh/current/styles/shThemeEclipse.css")
+			.attr("rel", "stylesheet")
+			.attr("type", "text/css");
 		
-		Element jqueryUi = head.appendElement("script")
-				.attr("src", "http://code.jquery.com/ui/1.10.3/jquery-ui.min.js");
-			
-		Element jqueryTheme = head.appendElement("link")
-				.attr("href", "http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css")
-				.attr("rel", "stylesheet")
-				.attr("type", "text/css");	
+
+		/** APIMiner 2.0 scripts **/
 		
-		head.appendChild(jquery);
-		head.appendChild(jqueryMigrate);
-		head.appendChild(jqueryUi);
-		head.appendChild(jqueryTheme);
-		
-		Element apiminerSearchScript = head.appendElement("script")
+		head.appendElement("script")
 				.attr("src", serverURL + "/resources/js/apiminer-search.js");
 			
-		Element apiminerWeaverScript = head.appendElement("script")
-				.attr("src", serverURL + "/resources/js/apiminer-weaver.js");
+		head.appendElement("script")
+				.attr("src", serverURL + "/resources/js/android-apiminer-weaver.js");
 		
-		Element apiminerOnloadScript = head.appendElement("script")
+		head.appendElement("script")
 				.html("window.onload = function () { get_dialog(); instruments();};");
 		
-		head.appendChild(apiminerSearchScript);
-		head.appendChild(apiminerWeaverScript);
-		head.appendChild(apiminerOnloadScript);
+		
+		/** APIMiner header **/
+		
+		Element header = jsoup.getElementsByTag("body").first();
+		
+		if (null != header) {
+			header.prependElement("div").addClass("apiminerHeaderDiv");
+		}
 		
 		FileOutputStream fos = new FileOutputStream(outputFile);
 		fos.write(jsoup.toString().getBytes());

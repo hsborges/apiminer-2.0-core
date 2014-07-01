@@ -2,7 +2,6 @@ package org.apiminer.checker;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -134,7 +133,7 @@ public class CompilationChecker {
 					CompilationUnit cu = CompilationChecker.getCompilationUnit(code, classpath, sourcePath);
 					
 					example.setHasProblems(false);
-					example.setProblems(new LinkedList<Integer>());
+					example.setProblems(new HashSet<Integer>());
 					if (cu.getProblems().length > 0) {
 						example.setHasProblems(true);
 						for (IProblem problem : cu.getProblems()) {
